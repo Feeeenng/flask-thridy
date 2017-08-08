@@ -9,13 +9,15 @@ from __future__ import unicode_literals
 import requests
 import json
 
-from flask import request,session
+from .error import Thirdy_OAuthException
+from flask import request,session,redirect,url_for
 
 class Sina:
 
-    def __init__(self,SINA_ID,SINA_KEY):
+    def __init__(self,SINA_ID,SINA_KEY,SINA_URL):
         self._consumer_key = SINA_ID
         self._consumer_secret = SINA_KEY
+        self._redirect_url = SINA_URL
         self._request_token_params = {'scope': 'email'}
         self._base_url = 'https://api.weibo.com/2/'
         self._authorize_url = 'https://api.weibo.com/oauth2/authorize'
@@ -31,10 +33,11 @@ class Sina:
         self._encoding = 'utf-8'
         self.app_key = None
 
+        self.requests = requests.session()
 
-    def authorize(self,callback=None,state=None,**kwargs):
-        url = '{0}?client_id={1}&response_type=code&redirect_uri={2}'.format(self._authorize_url,self._consumer_key,callback)
-        session['oauth_callback'] = callback
+    def authorize(self,state=None,**kwargs):
+        url = '{0}?client_id={1}&response_type=code&redirect_uri={2}'.format(self._authorize_url,self._consumer_key,self._redirect_url)
+        session['oauth_callback'] = self._redirect_url
         return url
 
     def authorized_response(self):
@@ -47,10 +50,18 @@ class Sina:
                 "code":request.args.get('code'),
                 "redirect_uri":session['oauth_callback']
             }
-            resp = requests.post(url,data)
-            return json.loads(resp.content)
+            resp = self.requests.post(url,data)
+            content = json.loads(resp.content)
+            if 'error_code' in content:
+                if content['error_code'] == 21325:
+                     raise Thirdy_OAuthException('Code hasn been Expired, Pleace again code !')
+                else:
+                    raise content
+            else:
+                return content
         else:
-            return 'no code'
+            raise Thirdy_OAuthException('The reuqests not code ')
+
 
     def get_user(self,url,data):
         resp = requests.get(self._base_url+url,data)

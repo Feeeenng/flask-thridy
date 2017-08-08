@@ -11,9 +11,10 @@ from flask import Flask,url_for,request,jsonify
 
 
 app = Flask(__name__)
-app.config['THRIDY_AUTH_TYPE'] ='SINA'
-app.config['THRIDY_AUTH_SINA_ID'] = '2157431491'
-app.config['THRIDY_AUTH_SINA_KEY'] = '636787d305eb0948d279f25161f54777'
+app.config['THRIDY_AUTH_TYPE_LIST'] =['SINA']
+app.config['THRIDY_AUTH_SINA_ID'] = ''
+app.config['THRIDY_AUTH_SINA_KEY'] = ''
+app.config['THRIDY_AUTH_SINA_REDIRECT'] = ''
 app.config['SECRET_KEY'] = '222aa'
 thridy = Thridy()
 
@@ -21,14 +22,14 @@ thridy = Thridy()
 
 @app.route('/')
 def index():
-    s = thridy.sina_authorize(callback=url_for('weibo_author',_external=True))
-    return thridy.sina_authorize(callback=url_for('weibo_author',_external=True))
+    return thridy.sina_authorize()
+
 
 @app.route('/weibo_login/authorized')
 def weibo_author():
-    resp =  thridy.sina_authorize_response()
+    resp = thridy.sina_authorize_response()
     data = {"access_token": resp['access_token'], "uid": resp['uid']}
-    user_data = thridy.sina_get_user('users/show.json',data)
+    user_data = thridy.sina_get_user(data)
     return jsonify(user_data)
 
 
