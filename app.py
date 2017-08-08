@@ -12,9 +12,9 @@ from flask import Flask,url_for,request,jsonify
 
 app = Flask(__name__)
 app.config['THRIDY_AUTH_TYPE_LIST'] =['SINA']
-app.config['THRIDY_AUTH_SINA_ID'] = ''
-app.config['THRIDY_AUTH_SINA_KEY'] = ''
-app.config['THRIDY_AUTH_SINA_REDIRECT'] = ''
+app.config['THRIDY_AUTH_SINA_ID'] = '2157431491'
+app.config['THRIDY_AUTH_SINA_KEY'] = '636787d305eb0948d279f25161f54777'
+app.config['THRIDY_AUTH_SINA_REDIRECT'] = 'http://test.howdata.cn/weibo_login/authorized'
 app.config['SECRET_KEY'] = '222aa'
 thridy = Thridy()
 

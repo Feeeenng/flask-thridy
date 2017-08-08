@@ -1,5 +1,14 @@
 # Created by .ignore support plugin (hsz.mobi)
 
+*.pyc
 .idea/
 venv/
 app.py
+requirements.txt
+
+
+
+build/*
+dist/*
+flask_thridy.egg-info/*
+Flask_thridy.egg-info/
