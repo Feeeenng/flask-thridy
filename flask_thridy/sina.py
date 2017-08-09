@@ -10,14 +10,14 @@ import requests
 import json
 
 from .error import Thirdy_OAuthException
-from flask import request,session,redirect,url_for
+from flask import request,session
 
 class Sina:
 
-    def __init__(self,SINA_ID,SINA_KEY,SINA_URL):
+    def __init__(self,SINA_ID,SINA_KEY,SINA_REDIRECT_URL):
         self._consumer_key = SINA_ID
         self._consumer_secret = SINA_KEY
-        self._redirect_url = SINA_URL
+        self._redirect_url = SINA_REDIRECT_URL
         self._request_token_params = {'scope': 'email'}
         self._base_url = 'https://api.weibo.com/2/'
         self._authorize_url = 'https://api.weibo.com/oauth2/authorize'
@@ -36,8 +36,13 @@ class Sina:
         self.requests = requests.session()
 
     def authorize(self,state=None,**kwargs):
+        if state:
+            state=state
+        else:
+            state = 'test'
+
         url = '{0}?client_id={1}&response_type=code&redirect_uri={2}'.format(self._authorize_url,self._consumer_key,self._redirect_url)
-        session['oauth_callback'] = self._redirect_url
+        session['sina_oauth_callback'] = self._redirect_url
         return url
 
     def authorized_response(self):
@@ -48,21 +53,27 @@ class Sina:
                 "client_secret":self._consumer_secret,
                 "grant_type":'authorization_code',
                 "code":request.args.get('code'),
-                "redirect_uri":session['oauth_callback']
+                "redirect_uri":session['sina_oauth_callback']
             }
             resp = self.requests.post(url,data)
+            if resp.status_code not in (200,201):
+                raise Thirdy_OAuthException (
+                    'Invaild response form Sina,',
+                    type='invaild_response', data=resp.content
+                )
             content = json.loads(resp.content)
-            if 'error_code' in content:
-                if content['error_code'] == 21325:
-                     raise Thirdy_OAuthException('Code hasn been Expired, Pleace again code !')
-                else:
-                    raise content
-            else:
-                return content
+            return content
         else:
             raise Thirdy_OAuthException('The reuqests not code ')
 
 
     def get_user(self,url,data):
         resp = requests.get(self._base_url+url,data)
-        return json.loads(resp.content)
+
+        if resp.status_code not in (200,201):
+            raise Thirdy_OAuthException (
+                'Invaild response form Sina,',
+                type='invaild_response', data=resp.content
+            )
+        else:
+            return json.loads(resp.content)

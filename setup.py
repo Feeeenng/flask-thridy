@@ -6,7 +6,7 @@
 '''
 from __future__ import unicode_literals
 
-from setuptools import setup
+from setuptools import setup,find_packages
 
 
 setup(
@@ -18,7 +18,7 @@ setup(
     author_email='z332007851@163.com',
     url='https://github.com/Feeeenng/flask-thridy',
     platforms = 'any',
-    packages = ['flask_thridy'],
+    packages = find_packages(),
     zip_safe=False,
     install_requires = [
         'Flask>=0.8',

@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 from flask import Flask, redirect, request
 from .sina import Sina
+from .tecent import Tecent
 from .error import Thirdy_OAuthException
 
 import re
@@ -50,6 +51,11 @@ class Thridy(object):
                 'THRIDY_AUTH_QQ_REDIRECT']:
                 raise Exception(
                     'Pleace set config "THRIDY_AUTH_QQ_ID" or "THRIDY_AUTH_QQ_KEY" or "THRIDY_AUTH_QQ_REDIRECT"')
+            try:
+                self.qq = Tecent(config['THRIDY_AUTH_QQ_ID'],config['THRIDY_AUTH_QQ_KEY'],
+                                 config['THRIDY_AUTH_QQ_REDIRECT'])
+            except:
+                raise Thirdy_OAuthException('Params not set , pleacse set Tecent params !')
 
 
         if config['THRIDY_AUTH_TYPE'] == 'SINA' or 'SINA' in config['THRIDY_AUTH_TYPE_LIST']:
@@ -85,14 +91,37 @@ class Thridy(object):
         return data
 
     def sina_get_user(self, data):
-        if not data or not isinstance (data, dict):
+        if not data or not isinstance(data, dict):
             raise Thirdy_OAuthException('Reuqest not data or is not dict type ')
 
-        if data.get ('access_token') is False:
+        if data.get('access_token') is None:
             raise Thirdy_OAuthException('Please set params Access_token !')
-        if data.get ('uid') is False:
+        if data.get('uid') is None:
             raise Thirdy_OAuthException('Please set params uid')
 
         user_url = 'users/show.json'
         data = self.sina.get_user(user_url, data)
         return data
+
+    def qq_authorize(self,state=None,**kwargs):
+        url = self.qq.authorize(state=state,**kwargs)
+        return redirect(url)
+
+    def qq_authorize_response(self):
+        try:
+            data = self.qq.authorized_response()
+            return data
+        except Exception as e:
+            raise Thirdy_OAuthException('Reuqests faild ,Please try again requests  CODE !')
+
+    def qq_get_open_id(self,access_token):
+        return self.qq.get_user_open_id(access_token)
+
+    def qq_get_user_info(self,data):
+        if not data or not isinstance (data, dict):
+            raise Thirdy_OAuthException ('Reuqest not data or is not dict type ')
+
+        if data.get('access_token') is None:
+            raise Thirdy_OAuthException ('Please set params Access_token !')
+
+        return self.qq.get_user_info(data)
