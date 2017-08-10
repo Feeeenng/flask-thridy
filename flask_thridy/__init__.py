@@ -83,14 +83,16 @@ class Thridy(object):
 
     def sina_authorize(self, state=None, **kwargs):
         url = self.sina.authorize(state=state, **kwargs)
-        s = redirect(url)
         return redirect(url)
 
     def sina_authorize_response(self):
-        data = self.sina.authorized_response()
-        return data
+        try :
+            data = self.sina.authorized_response()
+            return data
+        except Exception as e:
+            raise Thirdy_OAuthException('Reuqests faild ,Please try again requests  CODE ! ')
 
-    def sina_get_user(self, data):
+    def sina_get_user_info(self, data):
         if not data or not isinstance(data, dict):
             raise Thirdy_OAuthException('Reuqest not data or is not dict type ')
 

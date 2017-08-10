@@ -11,7 +11,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='Flask-thridy',
-    version='0.0.1',
+    version='0.0.2',
     description='simple use thridy for login you web',
     license='BSD',
     author='Feeeenng',
