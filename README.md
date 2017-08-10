@@ -1,6 +1,11 @@
 # flask-thridy
 flask的一个插件。 功能只有三个，微信，QQ，微博的第三方登录
 
+Installation
+-----
+```
+pip install flask-thridy
+```
 Requires
 -----
 
@@ -8,8 +13,8 @@ Requires
 * requests
 * Flask
 ```
-
 #### QQ开放平台使用示例：
+```
 from flask_thridy import Thridy
 from flask import Flask,request,jsonify
 
@@ -38,7 +43,6 @@ if __name__ == '__main__':
     thridy = Thridy()
     thridy.init_app(app)
     app.run(port=80,host='0.0.0.0',use_reloader=True,threaded=True)
-
 ```
 
 #### 觉得有用，可以点一下star哦（也欢迎转发）
