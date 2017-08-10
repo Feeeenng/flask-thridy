@@ -15,7 +15,7 @@ from .error import Thirdy_OAuthException
 import re
 import os
 
-__version__ = '0.0.1'
+
 
 
 class Thridy(object):
