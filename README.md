@@ -13,8 +13,8 @@ Requires
 * requests
 * Flask
 ```
-#### QQ开放平台使用示例：
-```
+### QQ开放平台使用示例：
+``` python
 from flask_thridy import Thridy
 from flask import Flask,request,jsonify
 
