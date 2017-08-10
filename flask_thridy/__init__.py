@@ -9,6 +9,7 @@ from __future__ import unicode_literals
 from flask import Flask, redirect, request
 from .sina import Sina
 from .tecent import Tecent
+from .wechat import Wechat
 from .error import Thirdy_OAuthException
 
 import re
@@ -56,7 +57,8 @@ class Thridy(object):
                                  config['THRIDY_AUTH_QQ_REDIRECT'])
             except:
                 raise Thirdy_OAuthException('Params not set , pleacse set Tecent params !')
-
+        else:
+            raise Thirdy_OAuthException('Please set THRIDY_AUTH_TYPE  ! ')
 
         if config['THRIDY_AUTH_TYPE'] == 'SINA' or 'SINA' in config['THRIDY_AUTH_TYPE_LIST']:
             if not config['THRIDY_AUTH_SINA_ID'] or not config['THRIDY_AUTH_SINA_KEY'] or not config[
@@ -68,12 +70,22 @@ class Thridy(object):
                                   config['THRIDY_AUTH_SINA_REDIRECT'])
             except:
                 raise Thirdy_OAuthException('Params not set ,Please set Sina params !')
+        else:
+            raise Thirdy_OAuthException('Please set THRIDY_AUTH_TYPE  ! ')
 
         if config['THRIDY_AUTH_TYPE'] == 'WECHAT' or 'WECHAT' in config['THRIDY_AUTH_TYPE_LIST']:
             if not config['THRIDY_AUTH_WECHAT_ID'] or not config['THRIDY_AUTH_WECHAT_KEY'] or not config[
                 'THRIDY_AUTH_WECHAT_REDIRECT']:
                 raise Exception(
                     'Pleace set config "THRIDY_AUTH_WECHAT_ID" or "THRIDY_AUTH_WECHAT_KEY" or "THRIDY_AUTH_WECHAT_REDIRECT" ')
+
+            try:
+                self.wechat = Wechat(config['THRIDY_AUTH_WECHAT_ID'], config['THRIDY_AUTH_WECHAT_KEY'],
+                                  config['THRIDY_AUTH_WECHAT_REDIRECT'])
+            except:
+                raise Thirdy_OAuthException('Params not set ,Please set Sina params !')
+        else:
+            raise Thirdy_OAuthException('Please set THRIDY_AUTH_TYPE  ! ')
 
 
         if not hasattr(app, 'extensions'):
@@ -82,10 +94,21 @@ class Thridy(object):
         app.extensions['thridy_auth'] = self
 
     def sina_authorize(self, state=None, **kwargs):
+        '''
+          登录的第一步  获取code
+         
+        :param state:  state csrf的传参
+        :param kwargs: 
+        :return: 
+        '''
         url = self.sina.authorize(state=state, **kwargs)
         return redirect(url)
 
     def sina_authorize_response(self):
+        '''
+           登录第二步  获取access_token
+        :return: 
+        '''
         try :
             data = self.sina.authorized_response()
             return data
@@ -93,6 +116,11 @@ class Thridy(object):
             raise Thirdy_OAuthException('Reuqests faild ,Please try again requests  CODE ! ')
 
     def sina_get_user_info(self, data):
+        '''
+            根据access_token 和uid 获取 用户信息
+        :param data:  access_token ,uid   <type> dict
+        :return: 
+        '''
         if not data or not isinstance(data, dict):
             raise Thirdy_OAuthException('Reuqest not data or is not dict type ')
 
@@ -127,3 +155,26 @@ class Thridy(object):
             raise Thirdy_OAuthException ('Please set params Access_token !')
 
         return self.qq.get_user_info(data)
+
+    def wechat_authorize(self,state=None,**kwargs):
+        url = self.wechat.authorize(state=state,**kwargs)
+        return redirect(url)
+
+    def wechat_authorize_response(self):
+        try:
+            data = self.wechat.authorize_response()
+            return data
+        except Exception as e:
+            raise Thirdy_OAuthException('Reuqests faild ,Please try again requests  CODE !')
+
+    def wechat_get_user_info(self,data):
+        if not data or not isinstance (data, dict):
+            raise Thirdy_OAuthException ('Reuqest not data or is not dict type ')
+
+        if data.get('access_token') is None:
+            raise Thirdy_OAuthException ('Please set params Access_token !')
+
+        if data.get('openid') is None:
+            raise Thirdy_OAuthException ('Please set params openid !')
+
+        return self.wechat.get_user_info(data)

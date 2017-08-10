@@ -15,8 +15,17 @@ from werkzeug import url_decode
 
 
 class Tecent:
+    '''
+     QQ  oauth2接口
+    '''
 
     def __init__(self,QQ_ID,QQ_KEY,QQ_REDIRECT_URL):
+        '''
+        
+        :param QQ_ID:  qq_id
+        :param QQ_KEY:   qq_key 
+        :param QQ_REDIRECT_URL:    qq 回调地址
+        '''
         self._consumer_key = QQ_ID
         self._consumer_secret = QQ_KEY
         self._redirect_url = QQ_REDIRECT_URL
@@ -30,12 +39,23 @@ class Tecent:
         self.requests = requests.session()
 
     def authorize(self,state=None,**kwargs):
+        '''
+          登录的第一步  获取code
+
+        :param state:  state csrf的传参
+        :param kwargs: 
+        :return: 
+        '''
         url = '{0}{1}?response_type=code&client_id={2}&redirect_uri={3}&state={4}'.format(self._base_url,self._authorize_url,
                                                                                           self._consumer_key,self._redirect_url,state
                                                                                           )
         return url
 
     def authorized_response(self):
+        '''
+        登录第二步  获取access_token
+       :return: 
+       '''
         if 'code' in request.args:
             url = self._base_url+self._access_token_url
             data = {
@@ -56,6 +76,11 @@ class Tecent:
             return content
 
     def get_user_open_id(self,access_token):
+        '''
+         通过access_token 获取open_id
+        :param access_token: 
+        :return: 
+        '''
         open_id_url = self._base_url+'/oauth2.0/me'
         data = {
             'access_token':access_token
@@ -65,6 +90,11 @@ class Tecent:
         return content
 
     def get_user_info(self,data):
+        '''
+       根据access_token 和openid 获取 用户信息
+       :param data:  access_token ,openid   <type> dict
+       :return: 
+       '''
         data = self.get_user_open_id(data['access_token'])
         url = self._base_url+'/user/get_user_info?access_token={0}&oauth_consumer_key={1}&openid={2}&format=json'.format(session['tecent_access_token'],self._consumer_key,
                                                                                                                           data['openid'])

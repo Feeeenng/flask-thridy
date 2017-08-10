@@ -13,8 +13,17 @@ from .error import Thirdy_OAuthException
 from flask import request,session
 
 class Sina:
+    '''
+    新浪oauth2 
+    '''
 
     def __init__(self,SINA_ID,SINA_KEY,SINA_REDIRECT_URL):
+        '''
+        
+        :param SINA_ID:  新浪id
+        :param SINA_KEY:  新浪key
+        :param SINA_REDIRECT_URL:   新浪回调地址
+        '''
         self._consumer_key = SINA_ID
         self._consumer_secret = SINA_KEY
         self._redirect_url = SINA_REDIRECT_URL
@@ -36,6 +45,13 @@ class Sina:
         self.requests = requests.session()
 
     def authorize(self,state=None,**kwargs):
+        '''
+          登录的第一步  获取code
+
+        :param state:  state csrf的传参
+        :param kwargs: 
+        :return: 
+        '''
         if state:
             state=state
         else:
@@ -46,6 +62,10 @@ class Sina:
         return url
 
     def authorized_response(self):
+        '''
+        登录第二步  获取access_token
+       :return: 
+       '''
         if 'code' in request.args:
             url = self._access_token_url
             data = {
@@ -68,6 +88,11 @@ class Sina:
 
 
     def get_user(self,url,data):
+        '''
+        根据access_token  uid 获取 用户信息
+        :param data:  access_token ,openid   <type> dict
+        :return: 
+        '''
         resp = requests.get(self._base_url+url,data)
 
         if resp.status_code not in (200,201):

@@ -14,6 +14,3 @@ class Thirdy_OAuthException(RuntimeError):
         self.message = message
         self.type = type
         self.data = data
-        self.get_message()
-    def get_message(self):
-        return self.message
